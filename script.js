@@ -15,6 +15,9 @@ $(function() {
 });
 
 function getAlbums() {
+	$('#canvasImg').remove();
+	downloaded = 0;
+	$('#canvas').css('display', 'inline');
 	$('#loading').css('display', 'block');
 	const API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
 	let username = $('#username').val();
@@ -66,6 +69,7 @@ function getAlbums() {
 
 function printAlbum(link, i, j) {
 	let img = new Image(sideLength, sideLength);
+	img.crossOrigin = 'Anonymous';
 	img.onload = function() {
 		c.drawImage(img, i * sideLength, j * sideLength);
 		downloaded++;
@@ -75,6 +79,8 @@ function printAlbum(link, i, j) {
 			let canvasImg = new Image(sideLength * cols, sideLength * rows);
 			canvasImg.src = canvas.toDataURL('image/png');
 			canvasImg.crossOrigin = 'Anonymous';
+			canvasImg.style = 'margin:10px;';
+			canvasImg.id = 'canvasImg';
 			$('#generated').append(canvasImg);
 		}
 	};
