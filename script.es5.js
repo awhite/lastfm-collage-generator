@@ -1,29 +1,12 @@
 'use strict';
 
-var accessToken;
 var canvas = void 0,
     c = void 0;
-var runOnce = false;
 var sideLength = void 0;
 var size = void 0;
 var cols = void 0,
     rows = void 0;
-var downloaded = void 0;
-
-function getSearchParameters() {
-	var prmstr = window.location.search.substr(1);
-	return prmstr != null && prmstr != '' ? transformToAssocArray(prmstr) : {};
-}
-
-function transformToAssocArray(prmstr) {
-	var params = {};
-	var prmarr = prmstr.split('&');
-	for (var i = 0; i < prmarr.length; i++) {
-		var tmparr = prmarr[i].split('=');
-		params[tmparr[0]] = tmparr[1];
-	}
-	return params;
-}
+var downloaded = 0;
 
 $(function () {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
@@ -36,9 +19,6 @@ $(function () {
 });
 
 function getAlbums() {
-	$('#canvasImg').remove();
-	downloaded = 0;
-	$('#canvas').css('display', 'inline');
 	$('#loading').css('display', 'block');
 	var API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
 	var username = $('#username').val();
@@ -92,7 +72,6 @@ function getAlbums() {
 
 function printAlbum(link, i, j) {
 	var img = new Image(sideLength, sideLength);
-	img.crossOrigin = 'Anonymous';
 	img.onload = function () {
 		c.drawImage(img, i * sideLength, j * sideLength);
 		downloaded++;
@@ -100,10 +79,8 @@ function printAlbum(link, i, j) {
 			$('#loading').css('display', 'none');
 			$('#canvas').css('display', 'none');
 			var canvasImg = new Image(sideLength * cols, sideLength * rows);
-			canvasImg.style = 'margin:10px;';
-			canvasImg.crossOrigin = 'Anonymous';
 			canvasImg.src = canvas.toDataURL('image/png');
-			canvasImg.id = 'canvasImg';
+			canvasImg.crossOrigin = 'Anonymous';
 			$('#generated').append(canvasImg);
 		}
 	};
