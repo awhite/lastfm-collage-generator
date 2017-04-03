@@ -1,0 +1,104 @@
+<html>
+
+<head>
+    <title>Last.fm Collage Generator</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css" />
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="container-fluid">
+    <div class="row text-center" id="title_div">
+        <h2>Collage Generator<span class="lighter"> for Last.fm</span><i class="fa fa-lastfm-square fa-right" aria-hidden="true"></i></h2>
+    </div>
+    <form id="form" class="row text-center form-inline">
+        <div class="form-group">
+            <label class="sr-only" for="username">Username</label>
+            <input type="text" class="form-control" placeholder="Username" id="username" required/>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="duration">Period</label>
+            <select id="duration" class="form-control">
+                <option selected disabled>Period:</option>
+                <option value="overall">Overall</option>
+                <option value="7day">7 day</option>
+                <option value="1month">1 month</option>
+                <option value="3month">3 month</option>
+                <option value="6month">6 month</option>
+                <option value="12month">1 year</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="columns">Columns</label>
+            <select id="columns" class="form-control">
+                <option selected disabled>Columns:</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="rows">Rows</label>
+            <select id="rows" class="form-control">
+                <option selected disabled>Rows:</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="size">Size</label>
+            <select id="size" class="form-control">
+                <option selected disabled>Size:</option>
+                <option value="0">Small</option>
+                <option value="1">Medium</option>
+                <option value="2">Large</option>
+                <option value="3">Extra Large</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-default" id="getAlbums">Generate</button>
+    </form>
+    <div id="loading" class="row text-center" style="display: none;">
+	    <div class="col-md-4 col-md-offset-4 text-center">
+	        <div class="alert alert-info" role="alert">
+	            <p>Loading...</p>
+	        </div>
+        </div>
+    </div>
+    <div id="generated" class="row text-center">
+        <canvas crossorigin="Anonymous" id="canvas"></canvas>
+    </div>
+    <nav class="navbar navbar-fixed-bottom">
+        <div class="container-fluid text-center">
+            <p id="copyright" style="display:none;"></p>
+        </div>
+    </nav>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="./script.es5.js"></script>
+</body>
+
+</html>

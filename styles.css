@@ -1,0 +1,106 @@
+#login_div {
+    margin-bottom: 24px;
+}
+
+#title_div {
+    margin-bottom: 12px;
+}
+
+#statements {
+    margin-top: 12px;
+}
+
+.btn-login {
+    color: #FFFFFF;
+    background-color: #b80610;
+    border-color: #FFFFFF;
+    font-size: 21px;
+}
+
+.btn-login:hover,
+.btn-login:focus,
+.open .dropdown-toggle.btn-login {
+    color: #b80610;
+    background-color: #FFFFFF;
+    border-color: #FFFFFF;
+}
+
+.open .dropdown-toggle.btn-login {
+    background-image: none;
+}
+
+.btn-login.disabled,
+.btn-login[disabled],
+fieldset[disabled] .btn-login,
+.btn-login.disabled:hover,
+.btn-login[disabled]:hover,
+fieldset[disabled] .btn-login:hover,
+.btn-login.disabled:focus,
+.btn-login[disabled]:focus,
+fieldset[disabled] .btn-login:focus {
+    background-color: #b80610;
+    border-color: #FFFFFF;
+}
+
+.btn-default, .btn-login .badge {
+    color: #b80610;
+    background-color: #FFFFFF;
+}
+
+.btn-default:hover {
+    color: #b80610;
+}
+
+.fa-spotify {
+    color: inherit;
+}
+
+.fa-right {
+    margin-left: 8px;
+}
+
+.fa-left {
+    margin-right: 8px;
+}
+
+.container-fluid {
+    background-color: #b80610;
+}
+
+h2 {
+    color: #ffffff;
+}
+
+#statements span {
+    color: #ffffff;
+    font-size: 24px;
+}
+
+body {
+    padding-bottom: 30px;
+}
+
+.navbar {
+    height: 30px;
+    min-height: 30px;
+}
+
+#copyright {
+    color: #ffffff;
+}
+
+.lighter {
+    font-weight: 300;
+}
+
+.darker  {
+    font-weight: bold;
+}
+
+#info {
+    margin-bottom: 24px;
+}
+
+label {
+    color: white;
+}
