@@ -44,7 +44,7 @@ function getAlbums() {
 			sideLength = 300;
 			break;
 	}
-	var URL = 'http://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
+	var URL = '//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
 	$.ajax(URL, {
 		type: 'GET',
 		dataType: 'json',
