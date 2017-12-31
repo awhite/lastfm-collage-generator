@@ -2,24 +2,27 @@ let canvas, c;
 let sideLength;
 let cols, rows;
 let downloaded = 0;
+const METHOD_ALBUMS = 1;
+const METHOD_ARTISTS = 2;
 
 $(function() {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit((e) => {
 		e.preventDefault();
-		getAlbums(
-			$('#username').val(), 
+		getContent(
+			$('#username').val().trim(),
 			$('#duration').find(':selected').val(),
 			parseInt($('#rows').find(':selected').val()),
 			parseInt($('#columns').find(':selected').val()),
-			parseInt($('#size').find(':selected').val()));
+			parseInt($('#size').find(':selected').val()),
+			parseInt($('#method').find(':selected').val()),
+			parseInt($('#showName').find(':selected').val()));
 	});
 	canvas = document.getElementById('canvas');
 	c = canvas.getContext('2d');
-	// getAlbums();
 });
 
-function getAlbums(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5, size = 3) {
+function getContent(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5, size = 3, method = METHOD_ALBUMS, showName = false) {
 	rows = _rows;
 	cols = _cols;
 	$('#canvasImg').remove();
@@ -42,8 +45,16 @@ function getAlbums(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5
 		sideLength = 300;
 		break;
 	}
-	const URL = `//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
-	$.ajax(URL, {
+	let url;
+	switch(method) {
+		case METHOD_ALBUMS:
+			url = `//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
+			break;
+		case METHOD_ARTISTS:
+			url = `//ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
+			break;
+	}
+	$.ajax(url, {
 		type: 'GET',
 		dataType: 'json',
 		success: function(data, status, xhr) {
@@ -53,14 +64,23 @@ function getAlbums(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5
 			c.fillStyle = 'black';
 			c.fillRect(0, 0, canvas.width, canvas.height);
 
-			let links = data.topalbums.album.map((album) => album.image[size]['#text']);
-			let titles = data.topalbums.album.map((album) => album.artist.name + ' – ' + album.name);
+			let links, titles;
+			switch(method) {
+				case METHOD_ALBUMS:
+					links = data.topalbums.album.map((album) => album.image[size]['#text']);
+					titles = data.topalbums.album.map((album) => album.artist.name + ' – ' + album.name);
+					break;
+				case METHOD_ARTISTS:
+					links = data.topartists.artist.map((artist) => artist.image[size]['#text']);
+					titles = data.topartists.artist.map((artist) => artist.name);
+					break;
+			}
 			for (let i = 0, k = 0; i < rows; i++) {
 				for (let j = 0; j < cols; j++, k++) {
 					if (!links[k] || links[k].length === 0) {
-						printAlbum(null, j, i, titles[k]);
+						printItem(null, j, i, titles[k]);
 					} else {
-						printAlbum(links[k], j, i);
+						printItem(links[k], j, i);
 					}
 				}
 			}
@@ -72,7 +92,7 @@ function getAlbums(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5
 	});
 }
 
-function printAlbum(link, i, j, title) {
+function printItem(link, i, j, title) {
 	if (title) {
 		c.textAlign = 'center';
 		c.textBaseline = 'middle';

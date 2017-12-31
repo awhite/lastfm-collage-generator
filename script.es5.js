@@ -6,19 +6,20 @@ var sideLength = void 0;
 var cols = void 0,
     rows = void 0;
 var downloaded = 0;
+var METHOD_ALBUMS = 1;
+var METHOD_ARTISTS = 2;
 
 $(function () {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit(function (e) {
 		e.preventDefault();
-		getAlbums($('#username').val(), $('#duration').find(':selected').val(), parseInt($('#rows').find(':selected').val()), parseInt($('#columns').find(':selected').val()), parseInt($('#size').find(':selected').val()));
+		getContent($('#username').val().trim(), $('#duration').find(':selected').val(), parseInt($('#rows').find(':selected').val()), parseInt($('#columns').find(':selected').val()), parseInt($('#size').find(':selected').val()), parseInt($('#method').find(':selected').val()), parseInt($('#showName').find(':selected').val()));
 	});
 	canvas = document.getElementById('canvas');
 	c = canvas.getContext('2d');
-	// getAlbums();
 });
 
-function getAlbums() {
+function getContent() {
 	var username = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'aaapwww';
 	var period = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '1month';
 
@@ -27,6 +28,8 @@ function getAlbums() {
 	var _cols = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 5;
 
 	var size = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 3;
+	var method = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : METHOD_ALBUMS;
+	var showName = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
 
 	rows = _rows;
 	cols = _cols;
@@ -50,8 +53,16 @@ function getAlbums() {
 			sideLength = 300;
 			break;
 	}
-	var URL = '//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
-	$.ajax(URL, {
+	var url = void 0;
+	switch (method) {
+		case METHOD_ALBUMS:
+			url = '//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
+			break;
+		case METHOD_ARTISTS:
+			url = '//ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
+			break;
+	}
+	$.ajax(url, {
 		type: 'GET',
 		dataType: 'json',
 		success: function success(data, status, xhr) {
@@ -61,18 +72,32 @@ function getAlbums() {
 			c.fillStyle = 'black';
 			c.fillRect(0, 0, canvas.width, canvas.height);
 
-			var links = data.topalbums.album.map(function (album) {
-				return album.image[size]['#text'];
-			});
-			var titles = data.topalbums.album.map(function (album) {
-				return album.artist.name + ' – ' + album.name;
-			});
+			var links = void 0,
+			    titles = void 0;
+			switch (method) {
+				case METHOD_ALBUMS:
+					links = data.topalbums.album.map(function (album) {
+						return album.image[size]['#text'];
+					});
+					titles = data.topalbums.album.map(function (album) {
+						return album.artist.name + ' – ' + album.name;
+					});
+					break;
+				case METHOD_ARTISTS:
+					links = data.topartists.artist.map(function (artist) {
+						return artist.image[size]['#text'];
+					});
+					titles = data.topartists.artist.map(function (artist) {
+						return artist.name;
+					});
+					break;
+			}
 			for (var i = 0, k = 0; i < rows; i++) {
 				for (var j = 0; j < cols; j++, k++) {
 					if (!links[k] || links[k].length === 0) {
-						printAlbum(null, j, i, titles[k]);
+						printItem(null, j, i, titles[k]);
 					} else {
-						printAlbum(links[k], j, i);
+						printItem(links[k], j, i);
 					}
 				}
 			}
@@ -84,7 +109,7 @@ function getAlbums() {
 	});
 }
 
-function printAlbum(link, i, j, title) {
+function printItem(link, i, j, title) {
 	if (title) {
 		c.textAlign = 'center';
 		c.textBaseline = 'middle';
