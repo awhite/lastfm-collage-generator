@@ -16,13 +16,25 @@ $(function() {
 			parseInt($('#columns').find(':selected').val()),
 			parseInt($('#size').find(':selected').val()),
 			parseInt($('#method').find(':selected').val()),
-			parseInt($('#showName').find(':selected').val()));
+			$('#showName').is(':checked'));
+	});
+	$('#method').change((e) => {
+		setOverlayLabel();
 	});
 	canvas = document.getElementById('canvas');
 	c = canvas.getContext('2d');
+	setOverlayLabel();
 });
 
-function getContent(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5, size = 3, method = METHOD_ALBUMS, showName = false) {
+function setOverlayLabel() {
+	if (parseInt($('#method').find(':selected').val()) === METHOD_ALBUMS) {
+		$('#showNameLabel').html('Overlay album name');
+	} else {
+		$('#showNameLabel').html('Overlay artist name');
+	}
+}
+
+function getContent(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5, size = 3, method = METHOD_ALBUMS, showName = true) {
 	rows = _rows;
 	cols = _cols;
 	$('#canvasImg').remove();
@@ -78,9 +90,9 @@ function getContent(username = 'aaapwww', period = '1month', _rows = 5, _cols = 
 			for (let i = 0, k = 0; i < rows; i++) {
 				for (let j = 0; j < cols; j++, k++) {
 					if (!links[k] || links[k].length === 0) {
-						printItem(null, j, i, titles[k]);
+						printItem(null, j, i, titles[k], true);
 					} else {
-						printItem(links[k], j, i);
+						printItem(links[k], j, i, titles[k], showName);
 					}
 				}
 			}
@@ -92,14 +104,9 @@ function getContent(username = 'aaapwww', period = '1month', _rows = 5, _cols = 
 	});
 }
 
-function printItem(link, i, j, title) {
-	if (title) {
-		c.textAlign = 'center';
-		c.textBaseline = 'middle';
-		const fontSize = sideLength * 1.3 / title.length;
-		c.font = `${fontSize}pt sans-serif`;
-		c.fillStyle = 'white';
-		c.fillText(title, i * sideLength + sideLength / 2, j * sideLength + sideLength / 2);
+function printItem(link, i, j, title, showName) {
+	if (!link) {
+		printName(i, j, title);
 		registerDownloaded();
 	} else {
 		let img = new Image(sideLength, sideLength);
@@ -107,10 +114,34 @@ function printItem(link, i, j, title) {
 		img.classList.add('img-responsive');
 		img.onload = function() {
 			c.drawImage(img, i * sideLength, j * sideLength);
+			if (showName) {
+				printName(i, j, title, true);
+			}
 			registerDownloaded();
 		};
 		img.src = link;
 	}
+}
+
+function printName(i, j, title, overlay = false) {
+	c.textAlign = 'center';
+	const fontSize = Math.min(sideLength * 1.3 / title.length, sideLength / 15);
+	c.font = `${fontSize}pt sans-serif`;
+	c.fillStyle = 'white';
+	const textX = i * sideLength + sideLength / 2;
+	let textY;
+	if (overlay) {
+		c.shadowBlur = 5;
+		c.shadowColor = '#2b2b2b';
+		c.shadowOffsetX = 2;
+		c.shadowOffsetY = 2;
+		c.textBaseline = 'bottom'
+		textY = j * sideLength + sideLength - sideLength / 30;
+	} else {
+		textY = j * sideLength + sideLength / 2;
+		c.textBaseline = 'middle';
+	}
+	c.fillText(title, textX, textY);
 }
 
 function registerDownloaded() {

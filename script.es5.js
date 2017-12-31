@@ -13,11 +13,23 @@ $(function () {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit(function (e) {
 		e.preventDefault();
-		getContent($('#username').val().trim(), $('#duration').find(':selected').val(), parseInt($('#rows').find(':selected').val()), parseInt($('#columns').find(':selected').val()), parseInt($('#size').find(':selected').val()), parseInt($('#method').find(':selected').val()), parseInt($('#showName').find(':selected').val()));
+		getContent($('#username').val().trim(), $('#duration').find(':selected').val(), parseInt($('#rows').find(':selected').val()), parseInt($('#columns').find(':selected').val()), parseInt($('#size').find(':selected').val()), parseInt($('#method').find(':selected').val()), $('#showName').is(':checked'));
+	});
+	$('#method').change(function (e) {
+		setOverlayLabel();
 	});
 	canvas = document.getElementById('canvas');
 	c = canvas.getContext('2d');
+	setOverlayLabel();
 });
+
+function setOverlayLabel() {
+	if (parseInt($('#method').find(':selected').val()) === METHOD_ALBUMS) {
+		$('#showNameLabel').html('Overlay album name');
+	} else {
+		$('#showNameLabel').html('Overlay artist name');
+	}
+}
 
 function getContent() {
 	var username = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'aaapwww';
@@ -29,7 +41,7 @@ function getContent() {
 
 	var size = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 3;
 	var method = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : METHOD_ALBUMS;
-	var showName = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
+	var showName = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : true;
 
 	rows = _rows;
 	cols = _cols;
@@ -95,9 +107,9 @@ function getContent() {
 			for (var i = 0, k = 0; i < rows; i++) {
 				for (var j = 0; j < cols; j++, k++) {
 					if (!links[k] || links[k].length === 0) {
-						printItem(null, j, i, titles[k]);
+						printItem(null, j, i, titles[k], true);
 					} else {
-						printItem(links[k], j, i);
+						printItem(links[k], j, i, titles[k], showName);
 					}
 				}
 			}
@@ -109,14 +121,9 @@ function getContent() {
 	});
 }
 
-function printItem(link, i, j, title) {
-	if (title) {
-		c.textAlign = 'center';
-		c.textBaseline = 'middle';
-		var fontSize = sideLength * 1.3 / title.length;
-		c.font = fontSize + 'pt sans-serif';
-		c.fillStyle = 'white';
-		c.fillText(title, i * sideLength + sideLength / 2, j * sideLength + sideLength / 2);
+function printItem(link, i, j, title, showName) {
+	if (!link) {
+		printName(i, j, title);
 		registerDownloaded();
 	} else {
 		var img = new Image(sideLength, sideLength);
@@ -124,10 +131,36 @@ function printItem(link, i, j, title) {
 		img.classList.add('img-responsive');
 		img.onload = function () {
 			c.drawImage(img, i * sideLength, j * sideLength);
+			if (showName) {
+				printName(i, j, title, true);
+			}
 			registerDownloaded();
 		};
 		img.src = link;
 	}
+}
+
+function printName(i, j, title) {
+	var overlay = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+	c.textAlign = 'center';
+	var fontSize = Math.min(sideLength * 1.3 / title.length, sideLength / 15);
+	c.font = fontSize + 'pt sans-serif';
+	c.fillStyle = 'white';
+	var textX = i * sideLength + sideLength / 2;
+	var textY = void 0;
+	if (overlay) {
+		c.shadowBlur = 5;
+		c.shadowColor = '#2b2b2b';
+		c.shadowOffsetX = 2;
+		c.shadowOffsetY = 2;
+		c.textBaseline = 'bottom';
+		textY = j * sideLength + sideLength - sideLength / 30;
+	} else {
+		textY = j * sideLength + sideLength / 2;
+		c.textBaseline = 'middle';
+	}
+	c.fillText(title, textX, textY);
 }
 
 function registerDownloaded() {
