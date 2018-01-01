@@ -11,10 +11,10 @@ $(function() {
 		e.preventDefault();
 		localStorage.username = $('#username').val().trim();
 		localStorage.period = $('#period').find(':selected').val();
-		localStorage.rows = $('#rows').find(':selected').val(),
-		localStorage.cols = $('#cols').find(':selected').val(),
-		localStorage.size = $('#size').find(':selected').val(),
-		localStorage.method = $('#method').find(':selected').val(),
+		localStorage.rows = $('#rows').find(':selected').val();
+		localStorage.cols = $('#cols').find(':selected').val();
+		localStorage.size = $('#size').find(':selected').val();
+		localStorage.method = $('#method').find(':selected').val();
 		localStorage.showName = $('#showName').is(':checked');
 		getContent();
 	});
@@ -67,17 +67,17 @@ function getContent() {
 	let limit = rows * cols;
 	switch (size) {
 		case 0:
-		sideLength = 34;
-		break;
+			sideLength = 34;
+			break;
 		case 1:
-		sideLength = 64;
-		break;
+			sideLength = 64;
+			break;
 		case 2:
-		sideLength = 174;
-		break;
+			sideLength = 174;
+			break;
 		default:
-		sideLength = 300;
-		break;
+			sideLength = 300;
+			break;
 	}
 	let url;
 	switch(method) {
@@ -157,7 +157,7 @@ function printName(i, j, title, overlay = false) {
 		c.shadowColor = '#2b2b2b';
 		c.shadowOffsetX = 2;
 		c.shadowOffsetY = 2;
-		c.textBaseline = 'bottom'
+		c.textBaseline = 'bottom';
 		textY = j * sideLength + sideLength - sideLength / 30;
 	} else {
 		textY = j * sideLength + sideLength / 2;
