@@ -13,15 +13,35 @@ $(function () {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit(function (e) {
 		e.preventDefault();
-		getContent($('#username').val().trim(), $('#duration').find(':selected').val(), parseInt($('#rows').find(':selected').val()), parseInt($('#columns').find(':selected').val()), parseInt($('#size').find(':selected').val()), parseInt($('#method').find(':selected').val()), $('#showName').is(':checked'));
+		localStorage.username = $('#username').val().trim();
+		localStorage.period = $('#period').find(':selected').val();
+		localStorage.rows = $('#rows').find(':selected').val(), localStorage.cols = $('#cols').find(':selected').val(), localStorage.size = $('#size').find(':selected').val(), localStorage.method = $('#method').find(':selected').val(), localStorage.showName = $('#showName').is(':checked');
+		getContent();
 	});
 	$('#method').change(function (e) {
 		setOverlayLabel();
 	});
 	canvas = document.getElementById('canvas');
 	c = canvas.getContext('2d');
-	setOverlayLabel();
+	setFieldsFromLocalStorage();
 });
+
+function setFieldsFromLocalStorage() {
+	setFieldFromLocalStorage('username');
+	setFieldFromLocalStorage('period');
+	setFieldFromLocalStorage('rows');
+	setFieldFromLocalStorage('cols');
+	setFieldFromLocalStorage('size');
+	setFieldFromLocalStorage('method');
+	$('#showName').prop('checked', localStorage.showName === 'true');
+	setOverlayLabel();
+}
+
+function setFieldFromLocalStorage(id) {
+	if (localStorage[id]) {
+		$('#' + id).val(localStorage[id]);
+	}
+}
 
 function setOverlayLabel() {
 	if (parseInt($('#method').find(':selected').val()) === METHOD_ALBUMS) {
@@ -32,19 +52,13 @@ function setOverlayLabel() {
 }
 
 function getContent() {
-	var username = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'aaapwww';
-	var period = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '1month';
-
-	var _rows = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 5;
-
-	var _cols = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 5;
-
-	var size = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 3;
-	var method = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : METHOD_ALBUMS;
-	var showName = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : true;
-
-	rows = _rows;
-	cols = _cols;
+	rows = parseInt(localStorage.rows);
+	cols = parseInt(localStorage.cols);
+	var username = localStorage.username;
+	var period = localStorage.period;
+	var size = parseInt(localStorage.size);
+	var method = parseInt(localStorage.method);
+	var showName = localStorage.showName === 'true';
 	$('#canvasImg').remove();
 	downloaded = 0;
 	$('#canvas').css('display', 'inline');

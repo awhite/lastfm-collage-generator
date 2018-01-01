@@ -9,22 +9,39 @@ $(function() {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit((e) => {
 		e.preventDefault();
-		getContent(
-			$('#username').val().trim(),
-			$('#duration').find(':selected').val(),
-			parseInt($('#rows').find(':selected').val()),
-			parseInt($('#columns').find(':selected').val()),
-			parseInt($('#size').find(':selected').val()),
-			parseInt($('#method').find(':selected').val()),
-			$('#showName').is(':checked'));
+		localStorage.username = $('#username').val().trim();
+		localStorage.period = $('#period').find(':selected').val();
+		localStorage.rows = $('#rows').find(':selected').val(),
+		localStorage.cols = $('#cols').find(':selected').val(),
+		localStorage.size = $('#size').find(':selected').val(),
+		localStorage.method = $('#method').find(':selected').val(),
+		localStorage.showName = $('#showName').is(':checked');
+		getContent();
 	});
 	$('#method').change((e) => {
 		setOverlayLabel();
 	});
 	canvas = document.getElementById('canvas');
 	c = canvas.getContext('2d');
-	setOverlayLabel();
+	setFieldsFromLocalStorage();
 });
+
+function setFieldsFromLocalStorage() {
+	setFieldFromLocalStorage('username');
+	setFieldFromLocalStorage('period');
+	setFieldFromLocalStorage('rows');
+	setFieldFromLocalStorage('cols');
+	setFieldFromLocalStorage('size');
+	setFieldFromLocalStorage('method');
+	$('#showName').prop('checked', localStorage.showName === 'true');
+	setOverlayLabel();
+}
+
+function setFieldFromLocalStorage(id) {
+	if (localStorage[id]) {
+		$(`#${id}`).val(localStorage[id]);
+	}
+}
 
 function setOverlayLabel() {
 	if (parseInt($('#method').find(':selected').val()) === METHOD_ALBUMS) {
@@ -34,9 +51,14 @@ function setOverlayLabel() {
 	}
 }
 
-function getContent(username = 'aaapwww', period = '1month', _rows = 5, _cols = 5, size = 3, method = METHOD_ALBUMS, showName = true) {
-	rows = _rows;
-	cols = _cols;
+function getContent() {
+	rows = parseInt(localStorage.rows);
+	cols = parseInt(localStorage.cols);
+	const username = localStorage.username;
+	const period = localStorage.period;
+	const size = parseInt(localStorage.size);
+	const method = parseInt(localStorage.method);
+	const showName = localStorage.showName === 'true';
 	$('#canvasImg').remove();
 	downloaded = 0;
 	$('#canvas').css('display', 'inline');
