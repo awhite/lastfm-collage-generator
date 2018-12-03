@@ -42,7 +42,8 @@ fieldset[disabled] .btn-login:focus {
     border-color: #FFFFFF;
 }
 
-.btn-default, .btn-login .badge {
+.btn-default,
+.btn-login .badge {
     color: #b80610;
     background-color: #FFFFFF;
 }
@@ -93,7 +94,7 @@ body {
     font-weight: 300;
 }
 
-.darker  {
+.darker {
     font-weight: bold;
 }
 
@@ -103,4 +104,8 @@ body {
 
 label {
     color: white;
+}
+
+.checked-stack {
+    display: block;
 }

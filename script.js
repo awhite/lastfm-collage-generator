@@ -4,7 +4,12 @@ const collageInfo = {};
 const METHOD_ALBUMS = 1;
 const METHOD_ARTISTS = 2;
 
-$(function() {
+const TIMEFRAME_TOO_SMALL = 4;
+const TIMEFRAME_TOO_SMALL_SPARSE = 3;
+const PERFECT = 2;
+const RETRY = 1;
+
+$(() => {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit((e) => {
 		e.preventDefault();
@@ -15,6 +20,7 @@ $(function() {
 		localStorage.size = $('#size').find(':selected').val();
 		localStorage.method = $('#method').find(':selected').val();
 		localStorage.showName = $('#showName').is(':checked');
+		localStorage.hideMissingArtwork = $('#hideMissing').is(':checked');
 		submit();
 	});
 	$('#method').change((e) => {
@@ -33,6 +39,7 @@ function setFieldsFromLocalStorage() {
 	setFieldFromLocalStorage('size');
 	setFieldFromLocalStorage('method');
 	$('#showName').prop('checked', localStorage.showName === 'true');
+	$('#hideMissing').prop('checked', localStorage.hideMissingArtwork === 'true');
 	setOverlayLabel();
 }
 
@@ -55,35 +62,20 @@ function submit() {
 
 	setCollageInfo();
 	initCanvas();
-	
-	// Last.fm specific
-	const username = localStorage.username;
-	const period = localStorage.period;
-	const API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
-	const limit = collageInfo.rows * collageInfo.cols;
-	
-	switch(collageInfo.method) {
-		case METHOD_ALBUMS:
-			collageInfo.url = `//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
-			break;
-		case METHOD_ARTISTS:
-			collageInfo.url = `//ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
-			break;
-	}
-	// End Last.fm specific
-	
+
 	getImageLinks();
 }
 
 function setCollageInfo() {
 	collageInfo.showName = localStorage.showName === 'true';
+	collageInfo.hideMissingArtwork = localStorage.hideMissingArtwork === 'true';
 	collageInfo.method = parseInt(localStorage.method);
 	collageInfo.size = parseInt(localStorage.size);
 	collageInfo.rows = parseInt(localStorage.rows);
 	collageInfo.cols = parseInt(localStorage.cols);
 
 	collageInfo.imageNum = collageInfo.rows * collageInfo.cols;
-	
+
 	switch (collageInfo.size) {
 		case 0:
 			collageInfo.sideLength = 34;
@@ -113,37 +105,111 @@ function initCanvas() {
 }
 
 function getImageLinks() {
-	$.ajax(collageInfo.url, {
-		type: 'GET',
-		dataType: 'json',
-		success: function(data, status, xhr) {
-			makeCollage(data);
-		},
-		error: function(xhr, status, error) {
-			console.log(status, error);
-			alert('There was an error');
+	// Last.fm specific
+	const username = localStorage.username;
+	const period = localStorage.period;
+	const API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
+	let limit = collageInfo.rows * collageInfo.cols;
+
+	const setUrlFromLimit = () => {
+		switch (collageInfo.method) {
+			case METHOD_ALBUMS:
+				collageInfo.url = `//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
+				break;
+			case METHOD_ARTISTS:
+				collageInfo.url = `//ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${username}&period=${period}&api_key=${API_KEY}&limit=${limit}&format=json`;
+				break;
 		}
-	});
+	};
+
+	const callApi = () => {
+		setUrlFromLimit();
+		$.ajax(collageInfo.url, {
+			type: 'GET',
+			dataType: 'json',
+			success: (data, status, xhr) => {
+				if (collageInfo.hideMissingArtwork) {
+					const artworkStatus = verifyEnoughArtwork(data);
+					if (artworkStatus.retryCode !== RETRY) {
+						const { links, titles } = artworkStatus;
+						makeCollage(links, titles);
+					} else {
+						console.log(`Missing ${artworkStatus.missing} images. Retrying with increased limit...`);
+						limit += artworkStatus.missing;
+						callApi();
+					}
+				} else {
+					const links = collageInfo.method === METHOD_ALBUMS ? 
+						data.topalbums.album.map(({ image }) => image[collageInfo.size]['#text']) :
+						data.topartists.artist.map(({ image }) => image[collageInfo.size]['#text']);
+					const titles = collageInfo.method === METHOD_ALBUMS ?
+						data.topalbums.album.map(({ artist, name }) => artist.name + ' – ' + name) :
+						data.topartists.artist.map(({ name }) => name);
+					makeCollage(links, titles);
+				}
+			},
+			error: (xhr, status, error) => {
+				console.log(status, error);
+				alert('There was an error');
+			}
+		});
+	};
+	// End Last.fm specific
+
+	const verifyEnoughArtwork = (data) => {
+		const artworkStatus = {};
+		const allLinksAndTitles = [];
+
+		if (collageInfo.method === METHOD_ALBUMS) {
+			for (let i = 0; i < data.topalbums.album.length; i++) {
+				allLinksAndTitles[i] = {
+					link: data.topalbums.album[i].image[collageInfo.size]['#text'],
+					title: data.topalbums.album[i].artist.name + ' – ' + data.topalbums.album[i].name
+				};
+			}
+		} else {
+			for (let i = 0; i < data.topalbums.album.length; i++) {
+				allLinksAndTitles[i] = {
+					link: data.topartists.artist[i].image[collageInfo.size]['#text'],
+					title: data.topartists.artist[i].name
+				};
+			}
+		}
+
+		const validLinksAndTitles = allLinksAndTitles.filter(({ link }) => link && link.length > 0);
+
+		artworkStatus.links = validLinksAndTitles.map(({ link }) => link);
+		artworkStatus.titles = validLinksAndTitles.map(({ title }) => title);
+
+		artworkStatus.missing = allLinksAndTitles.length - validLinksAndTitles.length;
+		if (allLinksAndTitles.length < limit) { // timeframe doesn't have enough entries
+			if (artworkStatus.missing === 0) { // all entries have titles
+				artworkStatus.retryCode = TIMEFRAME_TOO_SMALL;
+			} else { // not all entries have titles
+				artworkStatus.retryCode = TIMEFRAME_TOO_SMALL_SPARSE;
+			}
+		} else {
+			if (artworkStatus.missing === 0) { // perfect scenario
+				artworkStatus.retryCode = PERFECT;
+			} else { // retry
+				artworkStatus.retryCode = RETRY;
+			}
+		}
+		return artworkStatus;
+	};
+
+	callApi();
 }
 
-function makeCollage(data) {
-	let links, titles;
-
-	switch (collageInfo.method) {
-		case METHOD_ALBUMS:
-			links = data.topalbums.album.map((album) => album.image[collageInfo.size]['#text']);
-			titles = data.topalbums.album.map((album) => album.artist.name + ' – ' + album.name);
-			break;
-		case METHOD_ARTISTS:
-			links = data.topartists.artist.map((artist) => artist.image[collageInfo.size]['#text']);
-			titles = data.topartists.artist.map((artist) => artist.name);
-			break;
-	}
-
+function makeCollage(links, titles) {
 	for (let i = 0, k = 0; i < collageInfo.rows; i++) {
 		for (let j = 0; j < collageInfo.cols; j++, k++) {
 			if (!links[k] || links[k].length === 0) {
-				loadImage(null, j, i, titles[k], true);
+				if (!titles[k] || titles[k].length === 0) { // not enough images, we are settling for blank bottom corner
+					registerDownloaded();
+				} else {
+					loadImage(null, j, i, titles[k], true);
+				}
 			} else {
 				loadImage(links[k], j, i, titles[k], collageInfo.showName);
 			}
@@ -152,6 +218,7 @@ function makeCollage(data) {
 }
 
 function loadImage(link, i, j, title, showName) {
+	console.log(link, i, j, title, showName);
 	if (!link) {
 		printName(i, j, title);
 		registerDownloaded();
@@ -159,9 +226,9 @@ function loadImage(link, i, j, title, showName) {
 		let img = new Image(collageInfo.sideLength, collageInfo.sideLength);
 		img.crossOrigin = 'Anonymous';
 		img.classList.add('img-responsive');
-		img.onload = function() {
+		img.onload = function () {
 			c.drawImage(img, i * collageInfo.sideLength, j * collageInfo.sideLength);
-			if (showName) {
+			if (showName && title && title.length > 0) {
 				printName(i, j, title, true);
 			}
 			registerDownloaded();

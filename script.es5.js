@@ -7,6 +7,11 @@ var collageInfo = {};
 var METHOD_ALBUMS = 1;
 var METHOD_ARTISTS = 2;
 
+var TIMEFRAME_TOO_SMALL = 4;
+var TIMEFRAME_TOO_SMALL_SPARSE = 3;
+var PERFECT = 2;
+var RETRY = 1;
+
 $(function () {
 	$('#copyright').css('display', 'block').html('Copyright &copy; Alex White  ' + new Date().getFullYear());
 	$('#form').submit(function (e) {
@@ -18,6 +23,7 @@ $(function () {
 		localStorage.size = $('#size').find(':selected').val();
 		localStorage.method = $('#method').find(':selected').val();
 		localStorage.showName = $('#showName').is(':checked');
+		localStorage.hideMissingArtwork = $('#hideMissing').is(':checked');
 		submit();
 	});
 	$('#method').change(function (e) {
@@ -36,6 +42,7 @@ function setFieldsFromLocalStorage() {
 	setFieldFromLocalStorage('size');
 	setFieldFromLocalStorage('method');
 	$('#showName').prop('checked', localStorage.showName === 'true');
+	$('#hideMissing').prop('checked', localStorage.hideMissingArtwork === 'true');
 	setOverlayLabel();
 }
 
@@ -59,27 +66,12 @@ function submit() {
 	setCollageInfo();
 	initCanvas();
 
-	// Last.fm specific
-	var username = localStorage.username;
-	var period = localStorage.period;
-	var API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
-	var limit = collageInfo.rows * collageInfo.cols;
-
-	switch (collageInfo.method) {
-		case METHOD_ALBUMS:
-			collageInfo.url = '//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
-			break;
-		case METHOD_ARTISTS:
-			collageInfo.url = '//ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
-			break;
-	}
-	// End Last.fm specific
-
 	getImageLinks();
 }
 
 function setCollageInfo() {
 	collageInfo.showName = localStorage.showName === 'true';
+	collageInfo.hideMissingArtwork = localStorage.hideMissingArtwork === 'true';
 	collageInfo.method = parseInt(localStorage.method);
 	collageInfo.size = parseInt(localStorage.size);
 	collageInfo.rows = parseInt(localStorage.rows);
@@ -116,46 +108,137 @@ function initCanvas() {
 }
 
 function getImageLinks() {
-	$.ajax(collageInfo.url, {
-		type: 'GET',
-		dataType: 'json',
-		success: function success(data, status, xhr) {
-			makeCollage(data);
-		},
-		error: function error(xhr, status, _error) {
-			console.log(status, _error);
-			alert('There was an error');
+	// Last.fm specific
+	var username = localStorage.username;
+	var period = localStorage.period;
+	var API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
+	var limit = collageInfo.rows * collageInfo.cols;
+
+	var setUrlFromLimit = function setUrlFromLimit() {
+		switch (collageInfo.method) {
+			case METHOD_ALBUMS:
+				collageInfo.url = '//ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
+				break;
+			case METHOD_ARTISTS:
+				collageInfo.url = '//ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=' + username + '&period=' + period + '&api_key=' + API_KEY + '&limit=' + limit + '&format=json';
+				break;
 		}
-	});
+	};
+
+	var callApi = function callApi() {
+		setUrlFromLimit();
+		$.ajax(collageInfo.url, {
+			type: 'GET',
+			dataType: 'json',
+			success: function success(data, status, xhr) {
+				if (collageInfo.hideMissingArtwork) {
+					var artworkStatus = verifyEnoughArtwork(data);
+					if (artworkStatus.retryCode !== RETRY) {
+						var links = artworkStatus.links,
+						    titles = artworkStatus.titles;
+
+						makeCollage(links, titles);
+					} else {
+						console.log('Missing ' + artworkStatus.missing + ' images. Retrying with increased limit...');
+						limit += artworkStatus.missing;
+						callApi();
+					}
+				} else {
+					var _links = collageInfo.method === METHOD_ALBUMS ? data.topalbums.album.map(function (_ref) {
+						var image = _ref.image;
+						return image[collageInfo.size]['#text'];
+					}) : data.topartists.artist.map(function (_ref2) {
+						var image = _ref2.image;
+						return image[collageInfo.size]['#text'];
+					});
+					var _titles = collageInfo.method === METHOD_ALBUMS ? data.topalbums.album.map(function (_ref3) {
+						var artist = _ref3.artist,
+						    name = _ref3.name;
+						return artist.name + ' – ' + name;
+					}) : data.topartists.artist.map(function (_ref4) {
+						var name = _ref4.name;
+						return name;
+					});
+					makeCollage(_links, _titles);
+				}
+			},
+			error: function error(xhr, status, _error) {
+				console.log(status, _error);
+				alert('There was an error');
+			}
+		});
+	};
+	// End Last.fm specific
+
+	var verifyEnoughArtwork = function verifyEnoughArtwork(data) {
+		var artworkStatus = {};
+		var allLinksAndTitles = [];
+
+		if (collageInfo.method === METHOD_ALBUMS) {
+			for (var i = 0; i < data.topalbums.album.length; i++) {
+				allLinksAndTitles[i] = {
+					link: data.topalbums.album[i].image[collageInfo.size]['#text'],
+					title: data.topalbums.album[i].artist.name + ' – ' + data.topalbums.album[i].name
+				};
+			}
+		} else {
+			for (var _i = 0; _i < data.topalbums.album.length; _i++) {
+				allLinksAndTitles[_i] = {
+					link: data.topartists.artist[_i].image[collageInfo.size]['#text'],
+					title: data.topartists.artist[_i].name
+				};
+			}
+		}
+
+		var validLinksAndTitles = allLinksAndTitles.filter(function (_ref5) {
+			var link = _ref5.link;
+			return link && link.length > 0;
+		});
+
+		artworkStatus.links = validLinksAndTitles.map(function (_ref6) {
+			var link = _ref6.link;
+			return link;
+		});
+		artworkStatus.titles = validLinksAndTitles.map(function (_ref7) {
+			var title = _ref7.title;
+			return title;
+		});
+
+		artworkStatus.missing = allLinksAndTitles.length - validLinksAndTitles.length;
+		if (allLinksAndTitles.length < limit) {
+			// timeframe doesn't have enough entries
+			if (artworkStatus.missing === 0) {
+				// all entries have titles
+				artworkStatus.retryCode = TIMEFRAME_TOO_SMALL;
+			} else {
+				// not all entries have titles
+				artworkStatus.retryCode = TIMEFRAME_TOO_SMALL_SPARSE;
+			}
+		} else {
+			if (artworkStatus.missing === 0) {
+				// perfect scenario
+				artworkStatus.retryCode = PERFECT;
+			} else {
+				// retry
+				artworkStatus.retryCode = RETRY;
+			}
+		}
+		return artworkStatus;
+	};
+
+	callApi();
 }
 
-function makeCollage(data) {
-	var links = void 0,
-	    titles = void 0;
-
-	switch (collageInfo.method) {
-		case METHOD_ALBUMS:
-			links = data.topalbums.album.map(function (album) {
-				return album.image[collageInfo.size]['#text'];
-			});
-			titles = data.topalbums.album.map(function (album) {
-				return album.artist.name + ' – ' + album.name;
-			});
-			break;
-		case METHOD_ARTISTS:
-			links = data.topartists.artist.map(function (artist) {
-				return artist.image[collageInfo.size]['#text'];
-			});
-			titles = data.topartists.artist.map(function (artist) {
-				return artist.name;
-			});
-			break;
-	}
-
+function makeCollage(links, titles) {
 	for (var i = 0, k = 0; i < collageInfo.rows; i++) {
 		for (var j = 0; j < collageInfo.cols; j++, k++) {
 			if (!links[k] || links[k].length === 0) {
-				loadImage(null, j, i, titles[k], true);
+				if (!titles[k] || titles[k].length === 0) {
+					// not enough images, we are settling for blank bottom corner
+					registerDownloaded();
+				} else {
+					loadImage(null, j, i, titles[k], true);
+				}
 			} else {
 				loadImage(links[k], j, i, titles[k], collageInfo.showName);
 			}
@@ -164,6 +247,7 @@ function makeCollage(data) {
 }
 
 function loadImage(link, i, j, title, showName) {
+	console.log(link, i, j, title, showName);
 	if (!link) {
 		printName(i, j, title);
 		registerDownloaded();
@@ -173,7 +257,7 @@ function loadImage(link, i, j, title, showName) {
 		img.classList.add('img-responsive');
 		img.onload = function () {
 			c.drawImage(img, i * collageInfo.sideLength, j * collageInfo.sideLength);
-			if (showName) {
+			if (showName && title && title.length > 0) {
 				printName(i, j, title, true);
 			}
 			registerDownloaded();
