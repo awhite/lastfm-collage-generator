@@ -168,7 +168,7 @@ function getImageLinks() {
 				};
 			}
 		} else {
-			for (let i = 0; i < data.topalbums.album.length; i++) {
+			for (let i = 0; i < data.topartists.artist.length; i++) {
 				allLinksAndTitles[i] = {
 					link: data.topartists.artist[i].image[collageInfo.size]['#text'],
 					title: data.topartists.artist[i].name
