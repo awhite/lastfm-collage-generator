@@ -12,7 +12,7 @@ const RETRY = 1;
 $(() => {
   $('#copyright')
     .css('display', 'block')
-    .html('Copyright &copy; Alex White  ' + new Date().getFullYear());
+    .html(`Copyright &copy; Alex White  ${new Date().getFullYear()}`);
   $('#form').submit(e => {
     e.preventDefault();
     localStorage.username = $('#username')
@@ -168,7 +168,7 @@ function getImageLinks() {
               : data.topartists.artist.map(({ image }) => image[collageInfo.size]['#text']);
           const titles =
             collageInfo.method === METHOD_ALBUMS
-              ? data.topalbums.album.map(({ artist, name }) => artist.name + ' – ' + name)
+              ? data.topalbums.album.map(({ artist, name }) => `${artist.name} – ${name}`)
               : data.topartists.artist.map(({ name }) => name);
           makeCollage(links, titles);
         }
@@ -188,7 +188,7 @@ function getImageLinks() {
       for (let i = 0; i < data.topalbums.album.length; i++) {
         allLinksAndTitles[i] = {
           link: data.topalbums.album[i].image[collageInfo.size]['#text'],
-          title: data.topalbums.album[i].artist.name + ' – ' + data.topalbums.album[i].name
+          title: `${data.topalbums.album[i].artist.name} – ${data.topalbums.album[i].name}`
         };
       }
     } else {

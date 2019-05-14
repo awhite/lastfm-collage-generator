@@ -7,7 +7,6 @@ var collageInfo = {};
 var METHOD_ALBUMS = 1;
 var METHOD_ARTISTS = 2;
 
-var NOT_ENOUGH = 5;
 var TIMEFRAME_TOO_SMALL = 4;
 var TIMEFRAME_TOO_SMALL_SPARSE = 3;
 var PERFECT = 2;
@@ -115,7 +114,6 @@ function getImageLinks() {
   var API_KEY = 'b7cad0612089bbbfecfc08acc52087f1';
   var limit = collageInfo.rows * collageInfo.cols;
   var currentLimit = limit;
-  var lastTotal = 0;
 
   var setUrlFromLimit = function setUrlFromLimit() {
     switch (collageInfo.method) {
@@ -157,7 +155,7 @@ function getImageLinks() {
         var _titles = collageInfo.method === METHOD_ALBUMS ? data.topalbums.album.map(function (_ref4) {
           var artist = _ref4.artist,
               name = _ref4.name;
-          return artist.name + ' – ' + name;
+          return artist.name + ' \u2013 ' + name;
         }) : data.topartists.artist.map(function (_ref5) {
           var name = _ref5.name;
           return name;
@@ -179,7 +177,7 @@ function getImageLinks() {
       for (var i = 0; i < data.topalbums.album.length; i++) {
         allLinksAndTitles[i] = {
           link: data.topalbums.album[i].image[collageInfo.size]['#text'],
-          title: data.topalbums.album[i].artist.name + ' – ' + data.topalbums.album[i].name
+          title: data.topalbums.album[i].artist.name + ' \u2013 ' + data.topalbums.album[i].name
         };
       }
     } else {
@@ -225,14 +223,11 @@ function getImageLinks() {
       if (validLinksAndTitles.length >= limit) {
         // perfect scenario
         artworkStatus.retryCode = PERFECT;
-        // } else if (lastTotal === allLinksAndTitles) { // no more to get, should make the collage with what we have
-        //   artworkStatus.retryCode = NOT_ENOUGH;
       } else {
         // retry
         artworkStatus.retryCode = RETRY;
       }
     }
-    lastTotal = allLinksAndTitles.length;
     return artworkStatus;
   };
 
