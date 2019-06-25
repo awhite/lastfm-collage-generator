@@ -213,10 +213,10 @@ function getImageLinks() {
     if (allLinksAndTitles.length < limit) {
       // timeframe doesn't have enough entries
       if (artworkStatus.missing === 0) {
-        // all entries have titles
+        // all entries have artwork
         artworkStatus.retryCode = TIMEFRAME_TOO_SMALL;
       } else {
-        // not all entries have titles
+        // not all entries have artwork
         artworkStatus.retryCode = TIMEFRAME_TOO_SMALL_SPARSE;
       }
     } else {
@@ -280,6 +280,7 @@ function printName(i, j, title) {
   c.fillStyle = 'white';
   var textX = i * collageInfo.sideLength + collageInfo.sideLength / 2;
   var textY = void 0;
+  c.save();
   if (overlay) {
     c.shadowBlur = 5;
     c.shadowColor = '#2b2b2b';
@@ -292,6 +293,7 @@ function printName(i, j, title) {
     c.textBaseline = 'middle';
   }
   c.fillText(title, textX, textY);
+  c.restore();
 }
 
 function registerDownloaded() {
