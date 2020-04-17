@@ -12,6 +12,7 @@
 		</script>
 	<title>Last.fm Collage Generator</title>
 	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	<link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css" />
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
@@ -66,92 +67,101 @@
 		</svg>
 	</a>
 	<div class="row text-center" id="title_div">
-		<h2>Collage Generator<span class="lighter"> for Last.fm</span><i class="fa fa-lastfm-square fa-right" aria-hidden="true"></i></h2>
+		<h2>Collage Generator<span class="lighter"> for Last.fm</span><i class="fa fa-lastfm-square fa-right" aria-hidden="true"></i> (deprecated)</h2>
 	</div>
-	<form id="form" class="row text-center form-inline">
-		<div class="form-group">
-			<label class="sr-only" for="username">Username</label>
-			<input type="text" class="form-control" placeholder="Username" id="username" required />
+	<div class="row text-center">
+		<div class="container text-center">
+			<div class="alert alert-success" role="alert">
+			<p style="font-size: 2rem;">Check out the new and improved collage generator at <a style="color:black; text-decoration:underline;" href="https://lastcollage.io">lastcollage.io</a></p>
+			</div>
 		</div>
-		<div class="form-group">
-			<label class="sr-only" for="period">Timeframe</label>
-			<select id="period" class="form-control">
-				<option selected disabled>Timeframe:</option>
-				<option value="overall">Overall</option>
-				<option value="7day">1 week</option>
-				<option value="1month">1 month</option>
-				<option value="3month">3 month</option>
-				<option value="6month">6 month</option>
-				<option value="12month">1 year</option>
-			</select>
-		</div>
-		<div class="form-group">
-			<label class="sr-only" for="cols">Columns</label>
-			<select id="cols" class="form-control">
-				<option selected disabled>Columns:</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
-				<option value="5">5</option>
-				<option value="6">6</option>
-				<option value="7">7</option>
-				<option value="8">8</option>
-				<option value="9">9</option>
-				<option value="10">10</option>
-				<option value="11">11</option>
-				<option value="12">12</option>
-				<option value="13">13</option>
-				<option value="14">14</option>
-			</select>
-		</div>
-		<div class="form-group">
-			<label class="sr-only" for="rows">Rows</label>
-			<select id="rows" class="form-control">
-				<option selected disabled>Rows:</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
-				<option value="5">5</option>
-				<option value="6">6</option>
-				<option value="7">7</option>
-				<option value="8">8</option>
-				<option value="9">9</option>
-				<option value="10">10</option>
-				<option value="11">11</option>
-				<option value="12">12</option>
-				<option value="13">13</option>
-				<option value="14">14</option>
-			</select>
-		</div>
-		<div class="form-group">
-			<label class="sr-only" for="size">Size</label>
-			<select id="size" class="form-control">
-				<option selected disabled>Size:</option>
-				<option value="0">Small</option>
-				<option value="1">Medium</option>
-				<option value="2">Large</option>
-				<option value="3">Extra Large</option>
-			</select>
-		</div>
-		<div class="form-group">
-			<label class="sr-only" for="method">Metric</label>
-			<select id="method" class="form-control">
-				<option disabled>Metric:</option>
-				<option selected value="1">Top Albums</option>
-				<option value="2">Top Artists</option>
-			</select>
-		</div>
-		<div class="form-group">
-			<input type="checkbox" name="showName" class="form-check-input" value="" id="showName">
-			<label id="showNameLabel" class="form-check-label" for="showName" style="font-weight: normal;">Overlay album name</label>
-		</div>
-		<div class="form-group">
-			<input type="checkbox" name="hideMissing" class="form-check-input" value="" id="hideMissing">
-			<label id="hideMissingLabel" class="form-check-label" for="hideMissing" style="font-weight: normal;">Hide missing
-				artwork</label>
-		</div>
-		<button type="submit" class="btn btn-default" id="getAlbums">Generate</button>
-	</form>
+	</div>
+	<div class="container">
+		<form id="form" class="row text-center form-inline">
+			<div class="form-group">
+				<label class="sr-only" for="username">Username</label>
+				<input type="text" class="form-control" placeholder="Username" id="username" required />
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="period">Timeframe</label>
+				<select id="period" class="form-control">
+					<option selected disabled>Timeframe:</option>
+					<option value="overall">Overall</option>
+					<option value="7day">1 week</option>
+					<option value="1month">1 month</option>
+					<option value="3month">3 month</option>
+					<option value="6month">6 month</option>
+					<option value="12month">1 year</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="cols">Columns</label>
+				<select id="cols" class="form-control">
+					<option selected disabled>Columns:</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="rows">Rows</label>
+				<select id="rows" class="form-control">
+					<option selected disabled>Rows:</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="size">Size</label>
+				<select id="size" class="form-control">
+					<option selected disabled>Size:</option>
+					<option value="0">Small</option>
+					<option value="1">Medium</option>
+					<option value="2">Large</option>
+					<option value="3">Extra Large</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="method">Metric</label>
+				<select id="method" class="form-control">
+					<option disabled>Metric:</option>
+					<option selected value="1">Top Albums</option>
+					<option value="2">Top Artists</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<input type="checkbox" name="showName" class="form-check-input" value="" id="showName">
+				<label id="showNameLabel" class="form-check-label" for="showName" style="font-weight: normal;">Overlay album name</label>
+			</div>
+			<div class="form-group">
+				<input type="checkbox" name="hideMissing" class="form-check-input" value="" id="hideMissing">
+				<label id="hideMissingLabel" class="form-check-label" for="hideMissing" style="font-weight: normal;">Hide missing
+					artwork</label>
+			</div>
+			<button type="submit" class="btn btn-default" id="getAlbums">Generate</button>
+		</form>
+	</div>
 	<div id="loading" class="row text-center" style="display: none;">
 		<div class="col-md-4 col-md-offset-4 text-center">
 			<div class="alert alert-info" role="alert">

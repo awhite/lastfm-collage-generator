@@ -1,0 +1,15 @@
+{
+  "name": "lastfm-collage-generator",
+  "version": "1.0.0",
+  "description": "Generates a collage of album artwork based on data from Last.fm",
+  "main": "index.js",
+  "repository": "git@github.com:awhite/lastfm-collage-generator.git",
+  "author": "Alex White <awhite4096@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn babel script.js -o script.es5.js"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
+  }
+}
