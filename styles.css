@@ -109,3 +109,10 @@ label {
 .checked-stack {
     display: block;
 }
+
+@media (max-width: 767.98px) {
+  #form {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
