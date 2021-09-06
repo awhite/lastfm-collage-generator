@@ -78,7 +78,8 @@ h2 {
 }
 
 body {
-  padding-bottom: 30px;
+  position: relative;
+  padding-bottom: 204px;
 }
 
 .navbar {
