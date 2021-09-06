@@ -121,3 +121,32 @@ div[role="alert"] a {
   color: black;
   text-decoration: underline;
 }
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  padding-top: 20px;
+}
+
+.footer a {
+  text-decoration: underline;
+}
+
+.footer a:hover {
+  color: #eee;
+}
+
+.footer * {
+  color: white;
+}
+
+#copyright {
+  color: #eee;
+}

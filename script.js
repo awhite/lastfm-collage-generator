@@ -10,6 +10,7 @@ const PERFECT = 2;
 const RETRY = 1;
 
 $(() => {
+  console.log('hi');
   $('#copyright')
     .css('display', 'block')
     .html(`Copyright &copy; Alex White  ${new Date().getFullYear()}`);
